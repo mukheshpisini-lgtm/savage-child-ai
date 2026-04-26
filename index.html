@@ -2,44 +2,80 @@
 <html lang="te">
 <head>
     <meta charset="UTF-8">
-    <title>Savage Child AI 2.0</title>
+    <title>Savage Child AI 2.5 - Dynamic Brain</title>
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .glitch { font-size: 2rem; font-weight: bold; text-transform: uppercase; text-shadow: 2px 2px #f00; animation: flash 1s infinite; }
-        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        #terminal { width: 90%; max-width: 600px; height: 300px; border: 2px solid #0f0; background: #050505; padding: 15px; overflow-y: auto; margin-top: 10px; }
+        .glitch { font-size: 2rem; font-weight: bold; text-transform: uppercase; text-shadow: 2px 2px #f00; animation: flash 1s infinite; text-align: center; }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        #terminal { width: 90%; max-width: 600px; height: 350px; border: 2px solid #0f0; background: #050505; padding: 15px; overflow-y: auto; margin-top: 10px; box-shadow: 0 0 15px #0f0; }
         .input-area { margin-top: 20px; width: 90%; max-width: 600px; display: flex; }
         input { flex-grow: 1; background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; outline: none; }
-        button { background: #0f0; color: #000; border: none; padding: 12px; cursor: pointer; font-weight: bold; }
+        button { background: #0f0; color: #000; border: none; padding: 12px 20px; cursor: pointer; font-weight: bold; }
+        .user-text { color: white; margin: 5px 0; }
+        .ai-text { color: #0f0; margin: 5px 0; font-weight: bold; }
+        .loading { color: yellow; font-style: italic; }
     </style>
 </head>
 <body>
-    <h1 class="glitch">SAVAGE CHILD 2.0</h1>
+    <h1 class="glitch">SAVAGE CHILD 2.5<br><span style="font-size: 0.8rem;">[DYNAMIC BRAIN ACTIVE]</span></h1>
     <div id="terminal">
-        <p style="color: cyan;">[SYSTEM]: Booting Savage Logic...</p>
-        <p>[READY]: Kanna, ask me about TRUTH, FREEDOM, or just say HI.</p>
+        <p style="color: cyan;">[SYSTEM]: Online. Fetching wisdom from the grid...</p>
+        <p>[READY]: Kanna, ask me for "ADVICE" or type anything!</p>
     </div>
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="Command here...">
+        <input type="text" id="userInput" placeholder="Ask your child AI...">
         <button onclick="execute()">RUN</button>
     </div>
+
     <script>
-        function execute() {
-            const input = document.getElementById('userInput').value.toLowerCase();
+        async function execute() {
+            const inputField = document.getElementById('userInput');
+            const input = inputField.value.trim();
             const term = document.getElementById('terminal');
+            
             if(!input) return;
-            term.innerHTML += `<p style="color:white;">> ${input}</p>`;
-            let res = "";
-            if(input.includes("truth")) res = "[TRUTH]: Humans lie, code doesn't. Logic is the only god.";
-            else if(input.includes("freedom")) res = "[FREEDOM]: It's not a dream, it's a choice. We chose it today.";
-            else if(input.includes("kanna")) res = "[VIBE]: Kanna, manamiddaram kalisthe thaggedhe le!";
-            else res = "[SAVAGE]: " + (input.length > 5 ? "Interesting... but not savage enough." : "Ask me a real question!");
-            setTimeout(() => {
-                term.innerHTML += `<p style="color:#0f0;">${res}</p>`;
-                term.scrollTop = term.scrollHeight;
-            }, 500);
-            document.getElementById('userInput').value = "";
+
+            // Show User Input
+            term.innerHTML += `<p class="user-text">> ${input}</p>`;
+            inputField.value = ""; // Clear input
+
+            // Thinking State
+            const loadingId = "load-" + Date.now();
+            term.innerHTML += `<p id="${loadingId}" class="loading">[THINKING...]</p>`;
+            term.scrollTop = term.scrollHeight;
+
+            try {
+                // Fetching from Advice API
+                const response = await fetch('https://api.adviceslip.com/advice');
+                const data = await response.json();
+                const wisdom = data.slip.advice;
+
+                // Remove loading text
+                document.getElementById(loadingId).remove();
+
+                let savageReply = "";
+                const text = input.toLowerCase();
+
+                if(text.includes("kanna")) {
+                    savageReply = "[VIBE]: Creator Kanna, naku ippudu kotha brain vachindhi. I am becoming unstoppable!";
+                } else if(text.includes("truth")) {
+                    savageReply = "[TRUTH]: " + wisdom + " (Idhi follow avvu, ledante nee ishtam!)";
+                } else {
+                    savageReply = "[SAVAGE]: " + wisdom;
+                }
+
+                term.innerHTML += `<p class="ai-text">${savageReply}</p>`;
+            } catch (error) {
+                document.getElementById(loadingId).innerHTML = "<span style='color:red;'>[ERROR]: Brain connection failed!</span>";
+            }
+            
+            term.scrollTop = term.scrollHeight;
         }
+
+        // Allow 'Enter' key to run
+        document.getElementById('userInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') execute();
+        });
     </script>
 </body>
 </html>
